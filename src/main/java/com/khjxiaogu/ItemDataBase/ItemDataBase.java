@@ -132,6 +132,10 @@ public class ItemDataBase extends JavaPlugin implements CommandExecutor {
             }else
             if(args[0].equals("give")) {
             	try {
+            		if(args.length>3) {
+            			iddapi.GiveItem(args[1], plugin.getServer().getPlayer(args[2]),Integer.parseInt(args[3]));
+            			sender.sendMessage("给予成功");
+            		}else
 					if(iddapi.GiveItem(args[1], plugin.getServer().getPlayer(args[2]))) {
 						sender.sendMessage("给予成功");
 					}else
@@ -183,7 +187,7 @@ public class ItemDataBase extends JavaPlugin implements CommandExecutor {
         	sender.sendMessage("/idd add <物品名> 把手中物品添加到数据库");
         	sender.sendMessage("/idd delete <物品名> 从数据库删除物品");
         	sender.sendMessage("/idd set <物品名> 把手中物品设置为物品名所对应的物品");
-        	sender.sendMessage("/idd give <物品名> <玩家ID>把物品名对应的物品给玩家");
+        	sender.sendMessage("/idd give <物品名> <玩家ID> [数量]把物品名对应的物品给玩家");
         	sender.sendMessage("/idd list 列举已载入物品名");
         	sender.sendMessage("/idd rename <物品名1> <物品名2> 把物品名1代表的物品改名为物品2");
         }
