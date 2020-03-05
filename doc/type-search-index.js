@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"com.khjxiaogu.ItemDataBase.API","l":"ItemDataBaseAPI"},{"l":"所有类","url":"allclasses-index.html"}]

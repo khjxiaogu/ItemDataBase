@@ -1,0 +1,15 @@
+name: ${project.artifactId}
+main: ${project.groupId}.${project.artifactId}.${project.artifactId}
+version: ${project.version}
+author: khjxiaogu
+loadbefore: [PowerNBT]
+depend: [PowerNBT]
+commands:
+   idd:
+      description: 物品数据库主命令，输入/idd获得详细内容
+      permission: ItemDataBase.default
+      usage: /idd
+permissions:
+    ItemDataBase.default:
+     description: 使用物品数据库的权限
+     default: op
