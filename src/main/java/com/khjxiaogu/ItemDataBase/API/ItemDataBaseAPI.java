@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.khjxiaogu.ItemDataBase.DatabaseManager;
 import com.khjxiaogu.ItemDataBase.ItemDataBase;
+import com.khjxiaogu.khjxiaogu.ItemUtils;
 
 import me.dpohvar.powernbt.api.NBTCompound;
 
@@ -70,7 +71,9 @@ public class ItemDataBaseAPI {
 			items.put(ID,DatabaseManager.getItem(ID));
 			NBTCompound nc=ItemDataBase.nbtmanager.read(item);
 			if(nc!=null)
-			nbt.put(ID,nc);
+				nbt.put(ID,nc);
+			else
+				nbt.put(ID,new NBTCompound());
 			return true;
 		}
 		return false;
@@ -81,6 +84,7 @@ public class ItemDataBaseAPI {
 	 */
 	public void DeleteItem(String ID) {
 		items.remove(ID);
+		nbt.remove(ID);
 		DatabaseManager.DeleteItem(ID);
 	}
 	/**
@@ -95,6 +99,8 @@ public class ItemDataBaseAPI {
 		NBTCompound nc=ItemDataBase.nbtmanager.read(item);
 		if(nc!=null)
 		nbt.put(ID,nc);
+		else
+			nbt.put(ID,new NBTCompound());
 	}
 	/**
 	 * 在物品数据库中修改一个物品名称
@@ -109,9 +115,10 @@ public class ItemDataBaseAPI {
 			NBTCompound nc=nbt.remove(ID);
 			if(nc!=null)
 			nbt.put(ID2,nc);
+			else
+				nbt.put(ID2,new NBTCompound());
 			items.put(ID2,DatabaseManager.getItem(ID2));
 			return true;
-			
 		}
 		return false;
 	}
@@ -123,9 +130,8 @@ public class ItemDataBaseAPI {
 	public String GetID(ItemStack item) {
 		Set<String> IDs=items.keySet();
 		for(String ID:IDs) {
-			/*
 			if(ItemDataBaseAPI.ItemEqual(items.get(ID),item))
-				return ID;*/
+				return ID;
 		}
 		return null;
 	}
@@ -155,10 +161,12 @@ public class ItemDataBaseAPI {
 	public ItemStack GetItemClone(String ID) {
 		ItemStack is=items.get(ID);
 		ItemStack is2;
+		
 		if(is!=null)
 			is2=is.clone();
 		else
 			return null;
+		ItemUtils.InitializeItemStack(is2);
 		if(nbt.containsKey(ID)) {
 			ItemDataBase.nbtmanager.write(is2,nbt.get(ID));
 		}else {
@@ -169,11 +177,10 @@ public class ItemDataBaseAPI {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			if(nc==null)
+				nc=new NBTCompound();
 			nbt.put(ID, nc);
-			if(nc!=null) {
 			ItemDataBase.nbtmanager.write(is2,nc);
-			//ItemDataBase.plugin.getLogger().info("wrote"+nc.toHashMap().toString());
-			}
 		}
 		return is2;
 	}
@@ -194,13 +201,14 @@ public class ItemDataBaseAPI {
         int slot=pInv.firstEmpty();
         //ItemDataBase.nbtmanager.write(is2,nbt.get(ID));
         ItemStack toWrite;
+        
         if(slot>0) {
 	        pInv.setItem(slot,is2);
 	        toWrite=pInv.getItem(slot);
         }else {
         	toWrite=player.getWorld().dropItem(player.getLocation(),is2).getItemStack();
         }
-		if(nbt.containsKey(ID)) {
+		/*if(nbt.containsKey(ID)) {
 			NBTCompound nc=nbt.get(ID);
 			if(nc!=null)
 			ItemDataBase.nbtmanager.write(toWrite,nc);
@@ -212,13 +220,20 @@ public class ItemDataBaseAPI {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			if(nc==null)
+				nc=new NBTCompound();
 			nbt.put(ID, nc);
-			if(nc!=null) {
-				ItemDataBase.nbtmanager.write(toWrite,nc);
-			}
-		}
+			ItemDataBase.nbtmanager.write(toWrite,nc);
+		}*/
         return true;
 	}
+	/**
+	 * 给予玩家一定数目的指定物品
+	 * @param ID 物品名
+	 * @param player 玩家
+	 * @param count 数目
+	 * @return 是否成功
+	 */
 	public boolean GiveItem(String ID,Player player,int count) {
 		ItemStack item=GetItem(ID);
 		if(item==null) {
@@ -226,6 +241,7 @@ public class ItemDataBaseAPI {
 		}
 		ItemStack is2=item.clone();
         final Inventory pInv = player.getInventory();
+        
        // Add the items to the players inventory
         while(count>0) {
             int slot=pInv.firstEmpty();
@@ -249,10 +265,10 @@ public class ItemDataBaseAPI {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				if(nc==null)
+					nc=new NBTCompound();
 				nbt.put(ID, nc);
-				if(nc!=null) {
-					ItemDataBase.nbtmanager.write(toWrite,nc);
-				}
+				ItemDataBase.nbtmanager.write(toWrite,nc);
 			}
 			if(count>=item.getMaxStackSize()) {
 				toWrite.setAmount(item.getMaxStackSize());
@@ -301,5 +317,21 @@ public class ItemDataBaseAPI {
 			return true;*/
 		return false;
 	}
-	
+	/**
+	 * 比较两个物品包括NBT是否完全相同
+	 * @param A 物品1
+	 * @param B 物品2
+	 * @return 相同返回true
+	 */
+	public static boolean ItemExactEqual(ItemStack A,ItemStack B) {
+		if(A==null||B==null)
+			return false;
+		if(A.isSimilar(B))
+			return true;
+		NBTCompound nbtA=ItemDataBase.nbtmanager.read(A);
+		NBTCompound nbtB=ItemDataBase.nbtmanager.read(B);
+		if(nbtA.equals(nbtB))
+			return true;
+		return false;
+	}
 }

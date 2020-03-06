@@ -48,12 +48,7 @@ public class KHJUtils {
 			        	plugin.getLogger().log(Level.WARNING,"cannot retrive version:cannot connect");
 			        } else {
 			        	if(result=="UpdateNeeded") {
-			        		plugin.getLogger().log(Level.WARNING,"Update needed,please contact qq 1905387052 to get newest version");
-			        		return;
-			        	}
-			        	if(result=="Banned") {
-			        		plugin.getLogger().log(Level.SEVERE,"Your plugin is illeagal and got banned,please contact qq 1905387052 to unban.");
-			        		plugin.getServer().getPluginManager().disablePlugin(plugin);
+			        		plugin.getLogger().log(Level.WARNING,"Update needed,please update to get newest version");
 			        		return;
 			        	}
 			        	if(result=="ACCEPTED") {
@@ -143,26 +138,7 @@ public class KHJUtils {
 		    }
 		  }
 		}
-	public static String serializeItem(ItemStack item) {
-	    try {
-	        ByteArrayOutputStream str = new ByteArrayOutputStream();
-	        BukkitObjectOutputStream data = new BukkitObjectOutputStream(str);
-	        data.writeObject(item);
-	        data.close();
-	        return Base64.getEncoder().encodeToString(str.toByteArray());
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    return "";
-	}
-	
-	public static ItemStack deserializeItem(String itemData) throws IOException, ClassNotFoundException {
-	        ByteArrayInputStream stream = new ByteArrayInputStream(Base64.getDecoder().decode(itemData));
-	        BukkitObjectInputStream data = new BukkitObjectInputStream(stream);
-	        Object item=data.readObject();
-	        data.close();
-	        return (ItemStack) item;
-	}
+
 	/*public static String serializeItem(final ItemStack iStack) {
 		final YamlConfiguration cfg = new YamlConfiguration();
 		cfg.set("item", iStack);

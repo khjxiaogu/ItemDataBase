@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.khjxiaogu.khjxiaogu.ItemUtils;
 import com.khjxiaogu.khjxiaogu.KHJUtils;
 
 import me.dpohvar.powernbt.api.NBTCompound;
@@ -50,7 +51,7 @@ public class DatabaseManager {
      	ItemDataBase.plugin.getDB().execute(
     			"INSERT INTO items (id,item,nbt) "
     			+ "VALUES(?,?,?)",
-    			ID,KHJUtils.serializeItem(item),serializeNBT(item));
+    			ID,ItemUtils.serializeItem(item),serializeNBT(item));
     	return true;
 	}
 	public static void DeleteItem(String ID) {
@@ -84,10 +85,11 @@ public class DatabaseManager {
      	if(qr.next()) {
     		ItemStack item;
 			try {
-				item = KHJUtils.deserializeItem(qr.getString("item"));
+				item = ItemUtils.deserializeItem(qr.getString("item"));
 			} catch (ClassNotFoundException |IOException e) {
 				return null;
 			}
+			ItemUtils.InitializeItemStack(item);
 			NBTCompound nc;
 			if((nc=deserializeNBT(qr.getString("nbt")))!=null)
     		ItemDataBase.nbtmanager.write(item,nc);
@@ -112,7 +114,7 @@ public class DatabaseManager {
     		ItemStack item;
     		String ID=qr.getString("id");
 			try {
-				item = KHJUtils.deserializeItem(qr.getString("item"));
+				item = ItemUtils.deserializeItem(qr.getString("item"));
 			} catch (ClassNotFoundException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -121,6 +123,7 @@ public class DatabaseManager {
             	DeleteItem(ID);
             	continue;
 			}
+			ItemUtils.InitializeItemStack(item);
 			NBTCompound nc;
 			if((nc=deserializeNBT(qr.getString("nbt")))!=null) {
 				ItemDataBase.nbtmanager.write(item,nc);
