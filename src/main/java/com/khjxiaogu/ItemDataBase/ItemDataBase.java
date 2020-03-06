@@ -13,7 +13,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.khjxiaogu.ItemDataBase.API.ItemDataBaseAPI;
 import com.khjxiaogu.ItemDataBase.Database.Database;
@@ -25,183 +24,205 @@ import com.khjxiaogu.khjxiaogu.KHJUtils;
 
 import me.dpohvar.powernbt.api.NBTManager;
 
-
 /**
  * @author khjxiaogu
  * @time 2019年8月3日
- * file:ItemDataBase.java
+ *       file:ItemDataBase.java
  */
 public class ItemDataBase extends JavaPlugin implements CommandExecutor {
-    public static ItemDataBase plugin;
-    private Database database;
-    private static ItemDataBaseAPI iddapi;
-    //public static Map<String,ItemStack> itemmap=new HashMap();
-    public static NBTManager nbtmanager=NBTManager.nbtManager;
+	public static ItemDataBase plugin;
+	private Database database;
+	private static ItemDataBaseAPI iddapi;
+	private boolean comparemode;
+
+	public boolean isExactCompare() {
+		return comparemode;
+	}
+
+	public void setExactCompare(boolean comparemode) {
+		this.comparemode = comparemode;
+	}
+
+	// public static Map<String,ItemStack> itemmap=new HashMap();
+	public static NBTManager nbtmanager = NBTManager.nbtManager;
+
 	/**
 	 * 获取API
+	 * 
 	 * @return ItemDataBaseAPI类型的API
 	 */
-    public ItemDataBaseAPI getAPI() {
-    	return iddapi;
-    }
-    public void onEnable() {
-        KHJUtils.SendPluginInfo(this);
-        plugin=this;
-        File loc = new File(plugin.getDataFolder(), "config.yml");
-        if (!loc.exists()) {
-            plugin.saveResource("config.yml",true);
-            loc = new File(plugin.getDataFolder(), "config.yml");
-        }
-        try {
-            final ConfigurationSection dbCfg = getConfig().getConfigurationSection("database");
-            DatabaseCore dbCore;
-            if (dbCfg != null && dbCfg.getBoolean("mysql")) {
-                getLogger().info("启用MySQL 开始连接数据库...");
-                // MySQL database - Required database be created first.
-                final String user = dbCfg.getString("user");
-                final String pass = dbCfg.getString("password");
-                final String host = dbCfg.getString("host");
-                final String port = dbCfg.getString("port");
-                final String database = dbCfg.getString("database");
-                dbCore = new MySQLCore(host, user, pass, database, port);
-            } else {
-                // SQLite database - Doing this handles file creation
-                dbCore = new SQLiteCore(new File(this.getDataFolder(), "ItemData.db"));
-            }
-            this.database = new Database(dbCore);
-            // Make the database up to date
-            DatabaseHelper.setup(getDB());
-        } catch (final Exception e) {
-            getLogger().warning("数据库连接错误或配置错误...");
-            getLogger().warning("错误信息: " + e.getMessage());
-            e.printStackTrace();
-            getLogger().warning("关闭插件");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-		iddapi=ItemDataBaseAPI.getAPI();
-		/*new BukkitRunnable(){
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				ItemDataBase.plugin.getDB().getCore().flush();
+	public ItemDataBaseAPI getAPI() {
+		return ItemDataBase.iddapi;
+	}
+
+	@Override
+	public void onEnable() {
+		KHJUtils.SendPluginInfo(this);
+		ItemDataBase.plugin = this;
+		saveDefaultConfig();
+		try {
+			final ConfigurationSection dbCfg = getConfig().getConfigurationSection("database"); //$NON-NLS-1$
+			DatabaseCore dbCore;
+			if (dbCfg != null && dbCfg.getBoolean("mysql")) { //$NON-NLS-1$
+				getLogger().info(Messages.getString("ItemDataBase.enableMySQL")); //$NON-NLS-1$
+				// MySQL database - Required database be created first.
+				final String user = dbCfg.getString("user"); //$NON-NLS-1$
+				final String pass = dbCfg.getString("password"); //$NON-NLS-1$
+				final String host = dbCfg.getString("host"); //$NON-NLS-1$
+				final String port = dbCfg.getString("port"); //$NON-NLS-1$
+				final String database = dbCfg.getString("database"); //$NON-NLS-1$
+				dbCore = new MySQLCore(host, user, pass, database, port);
+			} else {
+				// SQLite database - Doing this handles file creation
+				dbCore = new SQLiteCore(new File(getDataFolder(), "ItemData.db")); //$NON-NLS-1$
 			}
-		}.runTaskTimerAsynchronously(ItemDataBase.plugin,200L, 200L);*/
-        Bukkit.getPluginCommand("idd").setExecutor(this);
-        plugin.getLogger().log(Level.INFO,"物品数据库插件已经启用");
-    }
-    public Database getDB() {
-        return this.database;
-    }
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-    	if (args.length >1) {
-            if (sender instanceof Player) {
-            	if(args[0].equals("add")) {
-            		try {
-						if(iddapi.AddItem(args[1], ((Player)sender).getItemInHand()))
-							sender.sendMessage("物品"+args[1]+"添加成功");
-						else
-							throw new SQLException("error");
-						
+			database = new Database(dbCore);
+			// Make the database up to date
+			DatabaseHelper.setup(getDB());
+		} catch (final Exception e) {
+			getLogger().warning(Messages.getString("ItemDataBase.databaseerror")); //$NON-NLS-1$
+			getLogger().warning(Messages.getString("ItemDataBase.errorMessage") + e.getMessage()); //$NON-NLS-1$
+			e.printStackTrace();
+			getLogger().warning(Messages.getString("ItemDataBase.disabling")); //$NON-NLS-1$
+			getServer().getPluginManager().disablePlugin(this);
+			return;
+		}
+		comparemode = getConfig().getBoolean("compareMode"); //$NON-NLS-1$
+		ItemDataBase.iddapi = ItemDataBaseAPI.getAPI();
+		/*
+		 * new BukkitRunnable(){
+		 * 
+		 * @Override
+		 * public void run() {
+		 * // TODO Auto-generated method stub
+		 * ItemDataBase.plugin.getDB().getCore().flush();
+		 * }
+		 * }.runTaskTimerAsynchronously(ItemDataBase.plugin,200L, 200L);
+		 */
+		Bukkit.getPluginCommand("idd").setExecutor(this); //$NON-NLS-1$
+		ItemDataBase.plugin.getLogger().log(Level.INFO, Messages.getString("ItemDataBase.enabled")); //$NON-NLS-1$
+	}
+
+	public Database getDB() {
+		return database;
+	}
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (args.length > 1) {
+			if (sender instanceof Player) {
+				if (args[0].equals("add")) { //$NON-NLS-1$
+					try {
+						if (ItemDataBase.iddapi.AddItem(args[1], ((Player) sender).getItemInHand())) {
+							sender.sendMessage(String.format(Messages.getString("ItemDataBase.add_succeed"), args[1])); //$NON-NLS-1$
+						} else
+							throw new SQLException("error"); //$NON-NLS-1$
+
 					} catch (SQLException e) {
-						sender.sendMessage("添加失败，物品可能已经存在，输入/sx set ID来修改");
+						sender.sendMessage(Messages.getString("ItemDataBase.add_fail")); //$NON-NLS-1$
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-            		return true;
-            	}else if(args[0].equals("set")){
+					return true;
+				} else if (args[0].equals("set")) { //$NON-NLS-1$
 					try {
-						iddapi.SetItem(args[1], ((Player)sender).getItemInHand());
+						ItemDataBase.iddapi.SetItem(args[1], ((Player) sender).getItemInHand());
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
-						sender.sendMessage("物品"+args[1]+"修改失败");
+						sender.sendMessage(String.format(Messages.getString("ItemDataBase.set_fail"), args[1])); //$NON-NLS-1$
 						e.printStackTrace();
 						return true;
 					}
-					sender.sendMessage("物品"+args[1]+"修改成功");
+					sender.sendMessage(String.format(Messages.getString("ItemDataBase.set_succeed"), args[1])); //$NON-NLS-1$
 					return true;
-            	}else if(args[0].equals("getNBT")) {
-                	((Player)sender).setItemInHand(iddapi.WriteNBT(args[1],((Player)sender).getItemInHand()));
-                	return true;
-                }
-            }
-            if(args[0].equals("delete")) {
-            	iddapi.DeleteItem(args[1]);
-            	sender.sendMessage("物品"+args[1]+"删除成功");
-            	return true;
-            }else
-            if(args[0].equals("give")) {
-            	try {
-            		if(args.length>3) {
-            			iddapi.GiveItem(args[1], plugin.getServer().getPlayer(args[2]),Integer.parseInt(args[3]));
-            			sender.sendMessage("给予成功");
-            		}else
-					if(iddapi.GiveItem(args[1], plugin.getServer().getPlayer(args[2]))) {
-						sender.sendMessage("给予成功");
-					}else
-						throw new SQLException("error");
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					sender.sendMessage("给予失败，物品"+args[1]+"可能不存在");
-					e.printStackTrace();
+				} else if (args[0].equals("getNBT")) { //$NON-NLS-1$
+					((Player) sender)
+							.setItemInHand(ItemDataBase.iddapi.WriteNBT(args[1], ((Player) sender).getItemInHand()));
+					return true;
 				}
-            	return true;
-            }else if(args[0].equals("setItem")){
+			}
+			if (args[0].equals("delete")) { //$NON-NLS-1$
+				ItemDataBase.iddapi.DeleteItem(args[1]);
+				sender.sendMessage(String.format(Messages.getString("ItemDataBase.delete_succeed"), args[1])); //$NON-NLS-1$
+				return true;
+			} else if (args[0].equals("give")) { //$NON-NLS-1$
 				try {
-					ItemStack active=iddapi.GetItem(args[1]);
-					active.setTypeId(Integer.parseInt(args[2]));
-					iddapi.SetItem(args[1],active);
+					if (args.length > 3) {
+						ItemDataBase.iddapi.GiveItem(args[1], ItemDataBase.plugin.getServer().getPlayer(args[2]),
+								Integer.parseInt(args[3]));
+						sender.sendMessage(Messages.getString("ItemDataBase.give_succeed")); //$NON-NLS-1$
+					} else if (ItemDataBase.iddapi.GiveItem(args[1],
+							ItemDataBase.plugin.getServer().getPlayer(args[2]))) {
+						sender.sendMessage(Messages.getString("ItemDataBase.give_succeed")); //$NON-NLS-1$
+					} else
+						throw new SQLException("error"); //$NON-NLS-1$
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
-					sender.sendMessage("物品"+args[1]+"修改失败");
+					sender.sendMessage(String.format(Messages.getString("ItemDataBase.give_fail"), args[1])); //$NON-NLS-1$
+					e.printStackTrace();
+				}
+				return true;
+			} else if (args[0].equals("setItem")) { //$NON-NLS-1$
+				try {
+					ItemStack active = ItemDataBase.iddapi.GetItem(args[1]);
+					active.setTypeId(Integer.parseInt(args[2]));
+					ItemDataBase.iddapi.SetItem(args[1], active);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					sender.sendMessage(String.format(Messages.getString("ItemDataBase.set_fail"), args[1])); //$NON-NLS-1$
 					e.printStackTrace();
 					return true;
 				}
-				sender.sendMessage("物品"+args[1]+"修改成功");
+				sender.sendMessage(String.format(Messages.getString("ItemDataBase.set_succeed"), args[1])); //$NON-NLS-1$
 				return true;
-        	}else if(args[0].equals("list")){
-				Set<String> list=iddapi.getList();
-				sender.sendMessage("现有物品");
-				for(String str:list) {
-					sender.sendMessage(str);
+			} else if (args[0].equals("rename")) { //$NON-NLS-1$
+				try {
+					if (ItemDataBase.iddapi.RenameItem(args[1], args[2])) {
+						sender.sendMessage(Messages.getString("ItemDataBase.rename_succeed")); //$NON-NLS-1$
+					} else
+						throw new SQLException("error"); //$NON-NLS-1$
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					sender.sendMessage(String.format(Messages.getString("ItemDataBase.rename_fail"), args[1])); //$NON-NLS-1$
+					e.printStackTrace();
 				}
 				return true;
-        	}else
-                if(args[0].equals("rename")) {
-                	try {
-    					if(iddapi.RenameItem(args[1],args[2])) {
-    						sender.sendMessage("更名成功");
-    					}else
-    						throw new SQLException("error");
-    				} catch (SQLException e) {
-    					// TODO Auto-generated catch block
-    					sender.sendMessage("更名失败，物品"+args[1]+"可能不存在");
-    					e.printStackTrace();
-    				}
-                	return true;
-                }
-                plugin.getLogger().log(Level.INFO,"请使用玩家身份");
-                return true;
-        }else {
-        	//Config.getStatesData();
-        	sender.sendMessage("/idd add <物品名> 把手中物品添加到数据库");
-        	sender.sendMessage("/idd delete <物品名> 从数据库删除物品");
-        	sender.sendMessage("/idd set <物品名> 把手中物品设置为物品名所对应的物品");
-        	sender.sendMessage("/idd give <物品名> <玩家ID> [数量]把物品名对应的物品给玩家");
-        	sender.sendMessage("/idd list 列举已载入物品名");
-        	sender.sendMessage("/idd rename <物品名1> <物品名2> 把物品名1代表的物品改名为物品2");
-        }
-    	return true;
-    }
-    @Override
-    public void onDisable() {
-        if (database != null) {
-            database.close();
-            try {
-                database.getConnection().close();
-            } catch (final SQLException ignored) {
-            }
-        }
-        super.onDisable();
-    }
+			} else if (args[0].equals("comparemode")) { //$NON-NLS-1$
+				comparemode = Boolean.parseBoolean(args[1]);
+				getConfig().set("compareMode", comparemode); //$NON-NLS-1$
+				saveConfig();
+			}
+			ItemDataBase.plugin.getLogger().log(Level.INFO, Messages.getString("ItemDataBase.runasplayer")); //$NON-NLS-1$
+			return true;
+		} else if (args.length > 0 && args[0].equals("list")) { //$NON-NLS-1$
+			Set<String> list = ItemDataBase.iddapi.getList();
+			sender.sendMessage(Messages.getString("ItemDataBase.current_item")); //$NON-NLS-1$
+			for (String str : list) {
+				sender.sendMessage(str);
+			}
+			return true;
+		} else {
+			// Config.getStatesData();
+			sender.sendMessage(Messages.getString("ItemDataBase.40")); //$NON-NLS-1$
+			sender.sendMessage(Messages.getString("ItemDataBase.41")); //$NON-NLS-1$
+			sender.sendMessage(Messages.getString("ItemDataBase.42")); //$NON-NLS-1$
+			sender.sendMessage(Messages.getString("ItemDataBase.43")); //$NON-NLS-1$
+			sender.sendMessage(Messages.getString("ItemDataBase.44")); //$NON-NLS-1$
+			sender.sendMessage(Messages.getString("ItemDataBase.45")); //$NON-NLS-1$
+			sender.sendMessage(Messages.getString("ItemDataBase.46")); //$NON-NLS-1$
+		}
+		return true;
+	}
+
+	@Override
+	public void onDisable() {
+		if (database != null) {
+			database.close();
+			try {
+				database.getConnection().close();
+			} catch (final SQLException ignored) {
+			}
+		}
+		super.onDisable();
+	}
 }

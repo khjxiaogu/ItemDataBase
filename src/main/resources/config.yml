@@ -1,7 +1,12 @@
 database:
-  mysql: false
-  host: localhost
-  port: 3306
-  database: dataitems
-  user: root
-  password: passwd
+#should we use mysql or local sqlite
+  mysql: "false"
+  host: "localhost"
+  port: "3306"
+  database: "dataitems"
+  user: "root"
+  password: "passwd"
+#should we use strict compare?
+#non-strict compare compares only enchantment,lore,durability only in vanilla.
+#strict compare would compare all nbt tags,would be useful if mod or other plugins depend on nbt is presented
+compareMode: true

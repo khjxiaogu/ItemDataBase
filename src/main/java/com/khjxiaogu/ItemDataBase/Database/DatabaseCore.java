@@ -3,11 +3,11 @@ package com.khjxiaogu.ItemDataBase.Database;
 import java.sql.Connection;
 
 public interface DatabaseCore {
-    Connection getConnection();
+	Connection getConnection();
 
-    void queue(BufferStatement bs);
+	void queue(BufferStatement bs);
 
-    void flush();
+	void flush();
 
-    void close();
+	void close();
 }
