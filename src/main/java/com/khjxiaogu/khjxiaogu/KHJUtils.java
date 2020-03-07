@@ -132,18 +132,4 @@ public class KHJUtils {
 			}
 		}
 	}
-
-	/*
-	 * public static String serializeItem(final ItemStack iStack) {
-	 * final YamlConfiguration cfg = new YamlConfiguration();
-	 * cfg.set("item", iStack);
-	 * return cfg.saveToString();
-	 * }
-	 * public static ItemStack deserializeItem(final String config) throws
-	 * InvalidConfigurationException {
-	 * final YamlConfiguration cfg = new YamlConfiguration();
-	 * cfg.loadFromString(config);
-	 * return cfg.getItemStack("item");
-	 * }
-	 */
 }
