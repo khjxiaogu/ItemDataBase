@@ -198,6 +198,7 @@ public class ItemDataBaseAPI {
 			is2 = is.clone();
 		} else
 			return null;
+		
 		is2 = ItemUtils.InitializeItemStack(is2);
 		if (nbt.containsKey(ID)) {
 			ItemDataBase.nbtmanager.write(is2, nbt.get(ID));
@@ -258,7 +259,7 @@ public class ItemDataBaseAPI {
 		is2.setAmount(count);
 		// Add the items to the players inventory
 		ArrayList<ItemStack> overflow = new ArrayList<>();
-		overflow.addAll(pInv.addItem().values());
+		overflow.addAll(pInv.addItem(is2).values());
 		for (ItemStack is : overflow) {
 			player.getWorld().dropItem(player.getLocation(), is);
 		}

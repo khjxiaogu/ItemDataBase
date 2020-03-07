@@ -32,7 +32,7 @@ public class ItemUtils {
 						ItemUtils.canUseNMS = true;
 						break;
 					}
-				} else if (ItemUtils.AsBukkitCopy == null && met.getName().equals("asCraftCopy")) {
+				} else if (ItemUtils.AsBukkitCopy == null && met.getName().equals("asBukkitCopy")) {
 					ItemUtils.AsBukkitCopy = met;
 					if (ItemUtils.AsNMSCopy != null) {
 						ItemUtils.canUseNMS = true;
@@ -76,7 +76,7 @@ public class ItemUtils {
 			try {
 				// Object n =AsNMSCopy.invoke(null,ref);
 				Object n = ref;
-				return (ItemStack) ItemUtils.AsBukkitCopy.invoke(null, n);
+				return (ItemStack) ItemUtils.AsBukkitCopy.invoke(null,ItemUtils.AsNMSCopy.invoke(null, n));
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| SecurityException e) {
 				e.printStackTrace();

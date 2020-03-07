@@ -2,8 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.khjxiaogu</groupId>
   <artifactId>ItemDataBase</artifactId>
-  <version>1.2.2</version>
-  <name>[依赖库]物品数据库</name>
+  <version>1.2.3</version>
+  <name>ItemDataBase</name>
       <build>
         <finalName>${project.name}${project.version}</finalName>
         <resources>
