@@ -190,6 +190,8 @@ public class ItemDataBase extends JavaPlugin implements CommandExecutor {
 				comparemode = Boolean.parseBoolean(args[1]);
 				getConfig().set("compareMode", comparemode); //$NON-NLS-1$
 				saveConfig();
+				sender.sendMessage(Messages.getString("ItemDataBase.setting_succeed")); //$NON-NLS-1$
+				return true;
 			}
 			ItemDataBase.plugin.getLogger().log(Level.INFO, Messages.getString("ItemDataBase.runasplayer")); //$NON-NLS-1$
 			return true;
