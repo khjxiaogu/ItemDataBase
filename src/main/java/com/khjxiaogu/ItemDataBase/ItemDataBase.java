@@ -147,7 +147,7 @@ public class ItemDataBase extends JavaPlugin implements CommandExecutor {
 				return true;
 			} else if (args[0].equals("give")) { //$NON-NLS-1$
 				try {
-					if(args.length > 3&&ItemDataBase.iddapi.GiveItem(args[1], ItemDataBase.plugin.getServer().getPlayer(args[2]),
+					if(args.length > 3&&ItemDataBase.iddapi.GiveItem(args[1], Bukkit.getPlayer(args[2]),
 								Integer.parseInt(args[3]))) {
 						sender.sendMessage(Messages.getString("ItemDataBase.give_succeed")); //$NON-NLS-1$
 					} else if (ItemDataBase.iddapi.GiveItem(args[1],
